@@ -17,11 +17,14 @@ MainWindow::MainWindow(QWidget *parent)
     reader = new Reader(this);
     connect(reader, &Reader::sendCardNumber,
             this, &MainWindow::handleCardNumber);
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete reader;
+    delete pinui;
 }
 
 void MainWindow::handleCardButton()
@@ -35,11 +38,38 @@ void MainWindow::handleCardButton()
 
 void MainWindow::handlePinButton()
 {
+    pinui = new PinUI(this);
+    connect(pinui, &PinUI::sendPinNumber,
+            this, &MainWindow::handlePinNumber);
+    connect(pinui, &PinUI::PinuiTimeOut,
+            this, &MainWindow::handlePinuiTimeout);
+
     qDebug()<<"Pin Button pressed";
+    //reader->show();
+    pinui->open();
+    //reader->exec();
+    qDebug()<<"Suoritettiinko tama viela";
 }
 
 void MainWindow::handleCardNumber(QString s)
 {
     qDebug()<<"Vastaanotettiin kortin numero";
     ui->cardNumber->setText(s);
+    reader->close();
+    delete reader;
+}
+
+void MainWindow::handlePinNumber(QString s)
+{
+    qDebug()<<"Vastaanotettiin PIN numero";
+    ui->pinNumber->setText(s);
+    pinui->close();
+    delete pinui;
+}
+
+void MainWindow::handlePinuiTimeout()
+{
+    qDebug()<<"Vastaanotettiin timeout signaali";
+    pinui->close();
+    delete pinui;
 }
